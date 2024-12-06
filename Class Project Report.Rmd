@@ -22,10 +22,10 @@ rm(list = ls())
 library(tidyverse)
 library(dplyr)
 library(esquisse)
-library(pdxTrees)  # Package contains secondary data source including information about trees in the city of Portland Oregon
 library(ggplot2)
 library(tidyr)
 library(stringr)
+library(pdxTrees)  # Package contains secondary data source including information about trees in the city of Portland, Oregon, USA
 ```
 
 ```{r}
@@ -190,5 +190,18 @@ BothLocations <-
 
 head(BothLocations)
 str(BothLocations)
+```
+
+```{r}
+# Using Regular expressions with Portland trees dataset
+
+Hybrid <-   # Creates a df that only includes hybrid species. 
+  pdxTrees_parks %>%
+  group_by(Scientific_Name) %>%
+  filter(grepl("hybrid", Origin, ignore.case = TRUE))
+
+
+
+
 ```
 
