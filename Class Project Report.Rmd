@@ -111,7 +111,7 @@ ggplot(Altoona_Fagaceae) +
  theme(axis.text.y = element_text(size = 13L), axis.text.x = element_text(size = 13L), 
  legend.text = element_text(size = 13L), legend.title = element_text(size = 13L))
 ```
-**Notes on Figures:** Trees that are in "Fair condition" on the Altoona campus have the largest Diameter at Breast Height (DBH). Most trees in the dataset have a moderate risk rating. There are very few trees with a high risk rating. The majority of the trees on the Penn State Atloona campus that are at risk of failure are in the family Fagaceae (oak and beech family). This makes sense as oak and beech trees are very abundant on the Penn State Altoona campus. The last figure focuses on just the family Fagaceae and what impact per DBH different species in that family may have. *Quercus alba* and *Quercus rubra* are the two most common species in the family on the Altoona campus. They have a wide range of sizes (represented by DBH) and are likely to cause damage to a variety of campus items if they fell.   
+**Notes on Figures - Altoona campus trees:** Trees that are in "Fair condition" on the Altoona campus have the largest Diameter at Breast Height (DBH). Most trees in the dataset have a moderate risk rating. There are very few trees with a high risk rating. The majority of the trees on the Penn State Altoona campus that are at risk of failure are in the family Fagaceae (oak and beech family). This makes sense as oak and beech trees are very abundant on the Penn State Altoona campus. The last figure focuses on just the family Fagaceae and what impact per DBH different species in that family may have. *Quercus alba* and *Quercus rubra* are the two most common species in the family on the Altoona campus. They have a wide range of sizes (represented by DBH) and are likely to cause damage to a variety of campus items, including sidewalks, parking areas, and picnic tables, if they fell down.   
 
 ## View Second Data Source: Trees in parks in Portland, Oregon
 From R package "pdxTrees"
@@ -122,10 +122,8 @@ str(pdxTrees_parks)
 head(pdxTrees_parks)
 ```
 ## Portland Trees: Summary statistics for Tree Height & DBH
-
+Using reduction functions to learn more about Portland park trees. 
 ```{r}
-# Using reduction functions to learn about Portland Trees
-
 mean_DBH_Portland <- 
   pdxTrees_parks %>%
   summarize(meanDBH = mean(DBH, na.rm = TRUE))
@@ -138,12 +136,11 @@ mean_height_Portland <-
 
 mean_height_Portland
 ```
+The diameter at breast height (measured at 4.5 feet above the ground) averaged to 20.6 inches. Note: Assuming inches because they used feet, but the R Documentation for pdxTrees_parks does not explicitly say units for any variable, unfortunately. The mean height was 65.7 feet. Once again I am assuming feet rather than meters. 
 
 ## Informative Plots about Portland, Oregon park trees
 
 ```{r}
-# esquisser(pdxTrees_parks)
-
 ggplot(pdxTrees_parks) +
  aes(x = Condition, y = Tree_Height) +
  geom_col(fill = "#112446") +
@@ -210,7 +207,7 @@ head(BothLocations)
 str(BothLocations)
 ```
 ## Using Regular Expressions
-
+I used regular expressions to determine how many trees in the Portland parks are of hybrid origin. The results indicate that 729 trees in Portland parks are hybrid out of a total 25,534 trees documented. I also used the functions filter and grepl to determine that 5,899 trees were inventoried in 2017, 9,998 trees were inventoried in 2018, and 9,637 trees were inventoried in 2019. I am impressed that the staff and volunteers were able to inventory close to 10k trees in two different years!     
 ```{r}
 # Using Regular expressions with Portland trees dataset
 
@@ -219,16 +216,35 @@ Hybrid <-   # Creates a df that only includes hybrid species.
   group_by(Scientific_Name) %>%
   filter(grepl("hybrid", Origin, ignore.case = TRUE))
 
-glimpse(Hybrid)
+head(Hybrid, n = 20)
 
+Inventory2017 <- 
+  pdxTrees_parks %>%
+  filter(grepl("2017", Inventory_Date))
+  
+Inventory2018 <-
+  pdxTrees_parks %>%
+  filter(grepl("2018", Inventory_Date))
 
+Inventory2019 <-
+  pdxTrees_parks %>%
+  filter(grepl("2019", Inventory_Date))
+
+nrow(Inventory2017)
+nrow(Inventory2018)
+nrow(Inventory2019)
 ```
 
 ## Wide vs. Narrow data
-
+The Portland park trees dataset is in "Wide" format now. I selected four variables and converted to "Narrow / Long" format. In general, I think the wide format is better for this data. It is easier and faster to read.  
 ```{r}
 # Using Spread or Gather to stack/unstack variables with Portland trees dataset
 
+Portland_narrow <-
+  pdxTrees_parks %>%
+  select(UserID, Scientific_Name, Tree_Height, Crown_Width_NS) %>%
+  pivot_longer(cols = c(Tree_Height, Crown_Width_NS), names_to = "dimension", values_to = "measurement")
 
+head(Portland_narrow, n = 20)
 ```
 
