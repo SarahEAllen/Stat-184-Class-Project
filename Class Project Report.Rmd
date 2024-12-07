@@ -9,10 +9,11 @@ output:
     fig_width: 5
 ---
 
-## Research Questions
+## Research / Guiding Questions
 
 Which tree species on the Penn State Altoona campus has the highest incidence of causing damage due to its location and condition risk?
 How do the at risk trees on the Penn State Altoona campus compare (e.g., species) to the tree species in parks in the city of Portland, Oregon? 
+What else can R do to help us learn more about Altoona campus and Portland, Oregon trees?
 
 ```{r message=FALSE}
 # clean up R environment
@@ -49,7 +50,7 @@ When & Why: Trees were inventoried in 2017, 2018, and 2019.
 Cases: Each case is one tree at a specific latitude and longitude found in a Portland, OR park. 25,534 cases. 
 Variables of interest: scientific name, DBH (diameter at breast height), condition, etc.
 
-## Altoona Trees: Summary statistics of DBH
+## Altoona Trees: Summary statistics of DBH (diameter at breast height)
 
 ```{r}
 # Using reduction functions to learn about DBH
@@ -63,21 +64,23 @@ mean_DBH <-
   AltoonaTrees %>%
   summarize(mean_column = mean(DBH, na.rm = TRUE))
 
-print(mean_DBH)
+mean_DBH
 
 # Determine min and max DBH values of Altoona Trees
-min_DBH_baseR <- min(AltoonaTrees$DBH, na.rm = TRUE)
-print(min_DBH_baseR)
+min_DBH_baseR <- 
+  min(AltoonaTrees$DBH, na.rm = TRUE)
 
-max_DBH_baseR <- max(AltoonaTrees$DBH, na.rm = TRUE)
-print(max_DBH_baseR)
+min_DBH_baseR
 
+max_DBH_baseR <- 
+  max(AltoonaTrees$DBH, na.rm = TRUE)
+
+max_DBH_baseR
 ```
 
 ## Altoona Trees: Plots
 
 ```{r fig.height=9, fig.width=9}
-# esquisser(AltoonaTrees)
 
 ggplot(AltoonaTrees) +
  aes(x = Condition.Class, y = DBH) +
@@ -94,8 +97,21 @@ ggplot(AltoonaTrees) +
  aes(x = Family) +
  geom_bar(fill = "#112446") +
  theme_minimal()
+
+# Filtering the AltoonaTrees dataset to focus on only the Fagaceae (oak and beech) plant family.
+Altoona_Fagaceae <-   
+  AltoonaTrees %>%
+  filter(Family == "Fagaceae") 
+  
+ggplot(Altoona_Fagaceae) +
+ aes(x = DBH, y = Primary.Target, fill = Scientific_Name) +
+ geom_boxplot() +
+ scale_fill_hue(direction = 1) +
+ theme_classic() +
+ theme(axis.text.y = element_text(size = 13L), axis.text.x = element_text(size = 13L), 
+ legend.text = element_text(size = 13L), legend.title = element_text(size = 13L))
 ```
-**Notes on Figures:** Trees that are in "Fair condition" on the Altoona campus have the largest Diameter at Breast Height (DBH). Most trees in the dataset have a moderate risk rating. There are very few trees with a high risk rating. The majority of the trees on the Penn State Atloona campus that are at risk of failure are in the family Fagaceae (oak and beech family). This makes sense as oak and beech trees are very abundant on the Penn State Altoona campus.  
+**Notes on Figures:** Trees that are in "Fair condition" on the Altoona campus have the largest Diameter at Breast Height (DBH). Most trees in the dataset have a moderate risk rating. There are very few trees with a high risk rating. The majority of the trees on the Penn State Atloona campus that are at risk of failure are in the family Fagaceae (oak and beech family). This makes sense as oak and beech trees are very abundant on the Penn State Altoona campus. The last figure focuses on just the family Fagaceae and what impact per DBH different species in that family may have. *Quercus alba* and *Quercus rubra* are the two most common species in the family on the Altoona campus. They have a wide range of sizes (represented by DBH) and are likely to cause damage to a variety of campus items if they fell.   
 
 ## View Second Data Source: Trees in parks in Portland, Oregon
 From R package "pdxTrees"
@@ -110,18 +126,17 @@ head(pdxTrees_parks)
 ```{r}
 # Using reduction functions to learn about Portland Trees
 
-# pdxTrees_parks$Tree_Height <- as.numeric(pdxTrees_parks$Tree_Height)
-# pdxTrees_parks %>% mean(Tree_Height, na.rm = TRUE)
-
 mean_DBH_Portland <- 
   pdxTrees_parks %>%
-  summarize(mean_column = mean(DBH, na.rm = TRUE))
-print(mean_DBH_Portland)
+  summarize(meanDBH = mean(DBH, na.rm = TRUE))
+
+mean_DBH_Portland
 
 mean_height_Portland <-
   pdxTrees_parks %>%
-  summarize(mean_column = mean(Tree_Height, na.rm = TRUE))
-print(mean_height_Portland)
+  summarize(meanHeight = mean(Tree_Height, na.rm = TRUE))
+
+mean_height_Portland
 ```
 
 ## Informative Plots about Portland, Oregon park trees
@@ -145,11 +160,25 @@ ggplot(pdxTrees_parks) +
  scale_fill_hue(direction = 1) +
  theme_minimal() +
  facet_wrap(vars(Native))
+
+# Filtering the Portland park dataset to focus only on the species Quercus rubra and Quercus alba that are also common on the Altoona campus.
+Portland_Fagaceae <-   
+  pdxTrees_parks %>%
+  filter(Scientific_Name == "Quercus rubra" | Scientific_Name == "Quercus alba") 
+  
+ggplot(Portland_Fagaceae) +
+ aes(x = DBH, y = Condition, fill = Scientific_Name) +
+ geom_boxplot() +
+ scale_fill_hue(direction = 1) +
+ theme_classic() +
+ theme(axis.text.y = element_text(size = 13L), axis.text.x = element_text(size = 13L), 
+ legend.text = element_text(size = 13L), legend.title = element_text(size = 13L))
 ```
 **Notes on Figures:** Trees of "Fair" condition are the most common in the Portland Parks. 
-The third plot is comparing the number of trees of different heights and faceting by whether they are native or non-native. There are more non-native trees that are shorter, whereas native trees tend to be taller.  
+The third plot is comparing the number of trees of different heights and faceting by whether they are native or non-native. There are more non-native trees that are shorter, whereas native trees tend to be taller. The fourth plot indicates that there are some *Quercus rubra* that are larger than *Quercus alba* in Portland parks. In addition, the *Quercus alba* that are present are in fair condition, whereas the *Quercus rubra* trees span all condition classes.    
 
 ## Additional Information about data sources
+Using more data verbs.
 
 ```{r}
 AltoonaTreesSpecies <-
@@ -174,23 +203,13 @@ head(PortlandTreeSpecies, n = 10)
 ## Join Data Frames using the Scientific name of species
 
 ```{r}
-# LeftTable %>% joinOperation(RightTable, vars_for_matching)
-# BothLocations <-
-# AltoonaTrees %>% 
-  # inner_join(pdxTrees_parks, Scientific_Name)
-# Keep getting error that the column name "Scientific_Name" is not found
-
-# colnames(AltoonaTrees)
-# colnames(pdxTrees_parks)
-# "Scientific_Name" %in% colnames(AltoonaTrees)
-# "Scientific_Name" %in% colnames(pdxTrees_parks)
-
 BothLocations <-
   inner_join(AltoonaTrees, pdxTrees_parks, by = "Scientific_Name")
 
 head(BothLocations)
 str(BothLocations)
 ```
+## Using Regular Expressions
 
 ```{r}
 # Using Regular expressions with Portland trees dataset
@@ -200,7 +219,15 @@ Hybrid <-   # Creates a df that only includes hybrid species.
   group_by(Scientific_Name) %>%
   filter(grepl("hybrid", Origin, ignore.case = TRUE))
 
+glimpse(Hybrid)
 
+
+```
+
+## Wide vs. Narrow data
+
+```{r}
+# Using Spread or Gather to stack/unstack variables with Portland trees dataset
 
 
 ```
